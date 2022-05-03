@@ -125,6 +125,22 @@ void alloc_Qtab2(void)
         }
 }
 
+void alloc_Qtab(void)
+{       
+        Q2 = malloc(cols*rows * sizeof(float*));
+        int i;
+        for (i = 0; i < cols*rows; ++i){
+                Q2[i] = malloc(number_actions * sizeof(float*));
+        }
+
+        int j;
+        for (i = 0; i < cols*rows; ++i) {
+                for (j = 0; j < number_actions ; ++j) {
+                    Q2[i][j] = 0;
+                }
+        }
+}
+
 
 int gen_nbr_alea(){
    time_t t;
@@ -259,31 +275,37 @@ void Q_learning(float alpha, float gamma){
     int nbr_alea=0;//
     alloc_Qtab1();//
     alloc_Qtab2();//
+    alloc_Qtab();//
     alloc_RewardTab();
     init_RewardTab();
     
     for(int i=0;i<I_max;i++){
         init_state(&st);
         maze_reset();
-        at=env_action_Qpolicy(st,Q,0.1);
         
         do{
        
             
-            // il faut faire Q=Q1+Q2
-            // il faut faire le argmax ... cf pdf cours 
+            //Q=Q1+Q2
+	    for(i = 0; i < rows; ++i){
+	    	for(j=0; j < cols; ++j){
+	        	Q[i][j] = Q1[i][j] + Q2[i][j];
+	        }
+	    }
+
             at=env_action_Qpolicy(st,Q,0.1);
             stp1 = maze_step(at);
-            atp1 = env_action_Qpolicy(stp1, Q, 0.0);
+            
             //
-            nbr_alea=gen_nbr_alea;
+            nbr_alea=gen_nbr_alea();
             if (nbr_alea==0){
+            atp1 = env_action_Qpolicy(stp1, Q1, 0.0);
             Q1[st.new_row*cols + st.new_col][at] += alpha*(stp1.reward + gamma*Q2[stp1.new_row*cols + stp1.new_col][atp1] - Q1[st.new_row*cols + st.new_col][at]);
             }
             else {
+            atp1 = env_action_Qpolicy(stp1, Q2, 0.0);
             Q2[st.new_row*cols + st.new_col][at] += alpha*(stp1.reward + gamma*Q1[stp1.new_row*cols + stp1.new_col][atp1] - Q2[st.new_row*cols + st.new_col][at]);
             }
-            // il faut faire le argmax ... cf pdf cours 
             //
             st=stp1;
         }while(st.done!=1 );
