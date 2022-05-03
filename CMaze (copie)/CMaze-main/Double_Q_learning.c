@@ -1,4 +1,4 @@
-#include "Q_learning.h" 
+#include "Double_Q_learning.h" 
 #include "functions.h"
 
 
@@ -94,7 +94,7 @@ void alloc_RewardTab(void)
 
 void alloc_Qtab1(void)
 {       
-        Q1 = malloc(cols*rows * sizeof(float*));
+        float ** Q1 = malloc(cols*rows * sizeof(float*));
         int i;
         for (i = 0; i < cols*rows; ++i){
                 Q1[i] = malloc(number_actions * sizeof(float*));
@@ -111,7 +111,7 @@ void alloc_Qtab1(void)
 
 void alloc_Qtab2(void)
 {       
-        Q2 = malloc(cols*rows * sizeof(float*));
+        float ** Q2 = malloc(cols*rows * sizeof(float*));
         int i;
         for (i = 0; i < cols*rows; ++i){
                 Q2[i] = malloc(number_actions * sizeof(float*));
@@ -127,16 +127,16 @@ void alloc_Qtab2(void)
 
 void alloc_Qtab(void)
 {       
-        Q2 = malloc(cols*rows * sizeof(float*));
+        float ** Q = malloc(cols*rows * sizeof(float*));
         int i;
         for (i = 0; i < cols*rows; ++i){
-                Q2[i] = malloc(number_actions * sizeof(float*));
+                Q[i] = malloc(number_actions * sizeof(float*));
         }
 
         int j;
         for (i = 0; i < cols*rows; ++i) {
                 for (j = 0; j < number_actions ; ++j) {
-                    Q2[i][j] = 0;
+                    Q[i][j] = 0;
                 }
         }
 }
@@ -265,7 +265,7 @@ void road_draw(){
 }
 
 
-void Q_learning(float alpha, float gamma){
+void Double_Q_learning(float alpha, float gamma){
 
 
     envOutput stp1, st;  
@@ -287,9 +287,9 @@ void Q_learning(float alpha, float gamma){
        
             
             //Q=Q1+Q2
-	    for(i = 0; i < rows; ++i){
-	    	for(j=0; j < cols; ++j){
-	        	Q[i][j] = Q1[i][j] + Q2[i][j];
+	    for(int k = 0; k < rows; ++k){
+	    	for(int l=0; l < cols; ++l){
+	        	Q[k][l] = Q1[k][l] + Q2[k][l];
 	        }
 	    }
 

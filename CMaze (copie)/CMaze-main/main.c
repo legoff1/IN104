@@ -1,4 +1,4 @@
-#include "Q_learning.h"
+#include "Double_Q_learning.h"
 
 
 
@@ -9,7 +9,7 @@ int main(){
    printf("number of actions :  %d \n", number_actions); 
    maze_render();
    
-   Q_learning(0.1, 0.9);
+   Double_Q_learning(0.1, 0.9);
     
    maze_render();
    return 0;
