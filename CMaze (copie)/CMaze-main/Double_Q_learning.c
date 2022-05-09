@@ -251,6 +251,7 @@ void init_state(envOutput *stepOut){
 void road_draw(){
 
 //// affiche route
+    int a=0;
     envOutput st;
     action at;
     init_state(&st);
@@ -259,9 +260,16 @@ void road_draw(){
         at=env_action_Qpolicy(st,Q,0.0);
         st = maze_step(at);
         maze[st.new_row][st.new_col]='.';
-    }while(st.done!=1 );
+        a++;
+    }while(a<cols*rows && st.done!=1 );
     maze[goal_row][goal_col]='g';
     maze[start_row][start_col]= 's';
+    if(st.done!=1){
+        printf("Nombres d'iterations insufissant augmentez le temps d'apprentissage\n");
+    }
+    else{
+        printf("chemin trouvé\n");
+    }
 }
 
 
