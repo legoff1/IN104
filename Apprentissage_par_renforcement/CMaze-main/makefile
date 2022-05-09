@@ -1,8 +1,7 @@
 CC=gcc
-#CFLAGS=-W -Wall -ansi -pedantic -std=c99 -g
 CFLAGS=Wall -Wfatal-errors
-SRC=Double_Q_learning.c functions.c main.c
-INC=functions.h Double_Q_learning.h 
+SRC=Q_learning.c functions.c main.c
+INC=functions.h Q_learning.h 
 OBJ=$(SRC:.c=.o)
 
 prog: $(OBJ)

@@ -7,6 +7,8 @@
 char** maze;
 float **RewardTab;
 float **Q;
+float **Q1;
+float **Q2;
 int rows;
 int cols;
 int start_row;
@@ -48,7 +50,13 @@ envOutput maze_step(action a);
 
 void alloc_RewardTab(void);
 
+void alloc_Qtab1(void);
+
+void alloc_Qtab2(void);
+
 void alloc_Qtab(void);
+
+int gen_nbr_alea(void);
 
 void init_RewardTab(void);
 
@@ -61,6 +69,8 @@ void init_state(envOutput *stepOut);
 void road_draw(void);
 
 void Q_learning(float alpha, float gamma);
+
+void Double_Q_learning(float alpha, float gamma);
 
 
 #endif /* Q_LEARNING_H */

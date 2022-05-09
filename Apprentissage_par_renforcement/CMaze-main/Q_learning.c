@@ -1,6 +1,7 @@
 #include "Q_learning.h" 
 #include "functions.h"
 
+
 void alloc_maze(){
      maze = malloc(rows * sizeof(char*));
 
@@ -90,6 +91,40 @@ void alloc_RewardTab(void)
         }
 }
 
+
+void alloc_Qtab1(void)
+{       
+        Q1 = malloc(cols*rows * sizeof(float*));
+        int i;
+        for (i = 0; i < cols*rows; ++i){
+                Q1[i] = malloc(number_actions * sizeof(float*));
+        }
+
+        int j;
+        for (i = 0; i < cols*rows; ++i) {
+                for (j = 0; j < number_actions ; ++j) {
+                    Q1[i][j] = 0;
+                }
+        }
+}
+
+
+void alloc_Qtab2(void)
+{       
+        Q2 = malloc(cols*rows * sizeof(float*));
+        int i;
+        for (i = 0; i < cols*rows; ++i){
+                Q2[i] = malloc(number_actions * sizeof(float*));
+        }
+
+        int j;
+        for (i = 0; i < cols*rows; ++i) {
+                for (j = 0; j < number_actions ; ++j) {
+                    Q2[i][j] = 0;
+                }
+        }
+}
+
 void alloc_Qtab(void)
 {       
         Q = malloc(cols*rows * sizeof(float*));
@@ -107,6 +142,15 @@ void alloc_Qtab(void)
 }
 
 
+int gen_nbr_alea(){
+
+   /* Print 5 random numbers from 0 to 49 */
+   return (rand() % 2);
+   }
+   
+   
+
+
 void init_RewardTab(void)
 {
         alloc_RewardTab();
@@ -115,7 +159,7 @@ void init_RewardTab(void)
         for (i = 0; i < rows; ++i) {
                 for (j = 0; j < cols; ++j) {
                         if (maze[i][j] == '+') {
-                                RewardTab[i][j] = -10;
+                                RewardTab[i][j] = -100;
                         } else if (maze[i][j] == 'g') {
                                 RewardTab[i][j] = 100;
                         } else {
@@ -124,6 +168,7 @@ void init_RewardTab(void)
                 }
         }
 }
+
 
 envOutput maze_step(action a){
     int done = 0;
@@ -213,13 +258,78 @@ void road_draw(){
         st = maze_step(at);
         maze[st.new_row][st.new_col]='.';
         a++;
-    }while(a < cols*rows && st.done!=1);
-    
-    if(a>=cols*rows){
-    	printf("chemin pas optimal augmenter le temps d'apprentissage\n");
-    }
+    }while(a<cols*rows && st.done!=1 );
     maze[goal_row][goal_col]='g';
     maze[start_row][start_col]= 's';
+    if(st.done!=1){
+        printf(" impossible to find the best road, please increase the learning time\n");
+    }
+    else{
+        printf("best road founded\n");
+    }
+}
+
+void sum_Q1_Q2(float **Q, float **Q1, float **Q2){
+    for (int i = 0; i < cols*rows; ++i)
+    {
+        for (int j = 0; j < number_actions ; ++j)
+        {
+            Q[i][j]=Q1[i][j] + Q2[i][j];
+        }
+    }
+}
+
+void Double_Q_learning(float alpha, float gamma){
+
+
+    envOutput stp1, st;  
+    action at,atp1;
+    
+    int k=0;
+    int nbr_alea=0;
+
+    float epsi=0.1;
+    int max_step=100000;
+    int I_max=1000;
+    alloc_Qtab1();
+    alloc_Qtab2();
+    alloc_Qtab();
+    alloc_RewardTab();
+    init_RewardTab();
+    
+    for(int i=0;i<I_max;i++){
+        init_state(&st);
+        maze_reset();
+        
+        do{
+            //
+            sum_Q1_Q2(Q,Q1,Q2);
+            at=env_action_Qpolicy(st,Q,epsi);
+            stp1 = maze_step(at);
+            
+            //
+            nbr_alea=gen_nbr_alea();
+            if (nbr_alea==0){
+                atp1 = env_action_Qpolicy(stp1, Q1, 0.0);
+                Q1[st.new_row*cols + st.new_col][at] += alpha*(stp1.reward + gamma*Q2[stp1.new_row*cols + stp1.new_col][atp1] - Q1[st.new_row*cols + st.new_col][at]);
+            }
+            else {
+                atp1 = env_action_Qpolicy(stp1, Q2, 0.0);
+                Q2[st.new_row*cols + st.new_col][at] += alpha*(stp1.reward + gamma*Q1[stp1.new_row*cols + stp1.new_col][atp1] - Q2[st.new_row*cols + st.new_col][at]);
+            }
+            //
+            st=stp1;
+            //
+            k++;
+            if (k>max_step){
+                printf("out of range\n");
+                break;
+            }
+        }while(st.done!=1 );
+        k=0;
+    }
+    printf("road_draw by Double_Q_learning\n");
+    road_draw();
 }
 
 
@@ -229,7 +339,10 @@ void Q_learning(float alpha, float gamma){
     envOutput stp1, st;  
     action at,atp1;
     
-    int I_max=10;
+    int k=0;
+    float epsi=0.1;
+    int max_step=100000;
+    int I_max=1000;
     alloc_Qtab();
     alloc_RewardTab();
     init_RewardTab();
@@ -237,27 +350,34 @@ void Q_learning(float alpha, float gamma){
     for(int i=0;i<I_max;i++){
         init_state(&st);
         maze_reset();
-        at=env_action_Qpolicy(st,Q,0.1);
         
         do{
-            at=env_action_Qpolicy(st,Q,0.1);
+            //
+            at=env_action_Qpolicy(st,Q,epsi);
             stp1 = maze_step(at);
             atp1 = env_action_Qpolicy(stp1, Q, 0.0);
             Q[st.new_row*cols + st.new_col][at] += alpha*(stp1.reward + gamma*Q[stp1.new_row*cols + stp1.new_col][atp1] - Q[st.new_row*cols + st.new_col][at]);
+            //
             st=stp1;
+            //
+            k++;
+            if (k>max_step){
+                printf("out of range\n");
+                break;
+            }
         }while(st.done!=1 );
         
+        k=0;
     }
-	printf("exploratiion terminer\n");
+
     // affichez les valeurs de Q
     /*
     for(int k=0;k<rows*cols;k++){
              printf(" %d\n\n",k);
             printf("%f   %f   %f   %f   \n",Q[k][0],Q[k][1],Q[k][2],Q[k][3]);
     }*/
+    printf("road_draw by Q_learning\n");
     road_draw();
-    
-    //test git
 
     
 }
