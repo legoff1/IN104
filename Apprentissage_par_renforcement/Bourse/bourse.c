@@ -1,14 +1,15 @@
 #include "bourse.h" 
 #include "functions.h"
-
+#include "math.h"
 
 
 void achat(int *cp, int *reward, int *Naction, int st, int **Env){ 
-	int Vach = floor(*cp/Env[st][1]);
+	int Vach = floor(*cp/Env[st][0]);
+    Vach = min(Env[st][1], Vach);
 	*cp=*cp-Env[st][0]*Vach;
 	*Naction = *Naction + Vach;
-	*reward=*reward+(Env[st+1][0] - Env[st][0])*Vach;
-	}
+	*reward=(Env[st+1][0] - Env[st][0])*Vach;
+   }
 
 
 
@@ -16,14 +17,13 @@ void vendre(int *cp, int *reward, int *Naction, int st, int **Env){
 	int Vvend = floor(min(*Naction, Env[st][1]));
 	*cp=*cp+Env[st][0]*Vvend;
 	*Naction = *Naction - Vvend;
-	*reward=*reward+(Env[st][0] - Env[st+1][0])*Vvend;
-	}
+	*reward=(Env[st][0] - Env[st+1][0])*Vvend;
+   }
 
 
 void garde(int *cp, int *reward, int *Naction, int st, int **Env){ 
-	*reward=*reward;
+	*reward=(Env[st+1][0] - Env[st][0])*(*Naction);
 	}
-
 
 
 
@@ -122,28 +122,15 @@ int make_action(action a, int *cp, int *reward, int *Naction, int st, int **Env 
     int done = 0;
     if(st==goal_row-1){
         done=1;
-        a=sell;
     }
 
-    if(a==buy && Env[st][0] > *cp){
-        if(*Naction < 1){
-            done =1;
-        }else{
-            a=no_action;
-        }
-    }
-    if (a==sell && *Naction < 1)
-        a=buy;
-
-/*
     if (a==sell){
-       vendre(int *cp, int *reward, int *Naction, int st, int **Env);
+       vendre(cp, reward, Naction, st, Env);
     }else if (a==buy){
-       achat(int *cp, int *reward, int *Naction, int st, int **Env);
+       achat(cp, reward, Naction, st, Env);
     }else if (a==no_action){
-       garde(int *cp, int *reward, int *Naction, int st, int **Env);
+       garde(cp, reward, Naction, st, Env);
     }
-*/
     if(*cp<0.5 && *Naction < 1){
        done   = 1;
     }
@@ -204,17 +191,18 @@ void road_draw(){
 
 //// affiche route
     int a=0;
-    int st;
+    int st=0;
     int Sdone=0;
     action at;
-    st=0;
     Env_reset();
     do{
         at=env_action_Qpolicy(st,Q,0.0);
         print_action(at);
-
-        //Sdone = make_action(at, cp, reward, Naction, st, Env)
         a++;
+        st++;
+        if(st==goal_row){
+            Sdone = 1;
+        }
     }while(a<rows && Sdone!=1 );
     if(Sdone!=1){
         printf(" impossible to find the best road, please increase the learning time\n");
@@ -241,10 +229,8 @@ void Double_Q_learning(float alpha, float gamma){
     action at,atp1;
     int Sdone=0;
     int reward=0;
-    int cp=0;
+    int cp=1500;
     int Naction=0;
-    cp++;
-    Naction++;
     int k=0;
     int nbr_alea=0;
 
@@ -254,10 +240,12 @@ void Double_Q_learning(float alpha, float gamma){
     alloc_Qtab1();
     alloc_Qtab2();
     alloc_Qtab();
+
     for(int i=0;i<I_max;i++){
         st=0;
         Env_reset();
-        
+        Naction = 0;
+        cp=1500;
         do{
             //
             sum_Q1_Q2(Q,Q1,Q2);
@@ -283,21 +271,23 @@ void Double_Q_learning(float alpha, float gamma){
                 printf("out of range\n");
                 break;
             }
-            if(st==goal_row-1){
+            if(st==goal_row-1 || cp <1 ){
                 Sdone=1;
             }
         }while(Sdone!=1 );
         k=0;
     }
     printf("road_draw by Double_Q_learning\n");
-    road_draw();
-
 
     // affichez les valeurs de Q
-    /*
-    for(int k=0;k<rows*cols;k++){
+/*    
+    for(int k=0;k<rows;k++){
              printf(" %d\n\n",k);
-            printf("%f   %f   %f   %f   \n",Q[k][0],Q[k][1],Q[k][2],Q[k][3]);
-    }*/
+            printf("%f   %f   %f  \n",Q[k][0],Q[k][1],Q[k][2]);
+    }
+
+  */
+        road_draw();
+
 
 }
