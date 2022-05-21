@@ -1,0 +1,66 @@
+Principe:
+Environnement constitué des jours de la semaine/mois ou années prix moyens d'une action et son volume ou quantité
+
+chaque état representé par un jour et est un vecteur à 2 composantes: le prix moyen d'une action ce jour et le volume (que des entiers) :
+Q(i)=(15, 1500)
+
+le but de l'algorithme est de determiner les action a effectuer pour maximiser son gain en un jour t sachant qu'on avait un capital C0 au depart
+
+* Variables:
+C0: capital initial
+Ct: capital à l'instant t
+Vach : volume d'action acheter a l'instant t
+Vvend: volume d'action vendu a l'instant t
+Pt: prix de l'action à l'instant t
+Ptp1 : prix de l'action à l'instant t+1
+Naction : nombre action possédé
+V : volume action a un instant t
+E : liste des etats
+
+
+* calcul des reward
+	Achat : r= (Ptp1 - Pt)*Vach
+	Vente : r= (Pt - Ptp1)*Vvend
+	Garder: r= (Ptp1 - Pt)*Vach
+
+
+* Choix action
+
+	si Achat 
+		et Pt>capital 
+			alors si Naction ==0 fin boucle
+				retourner capital
+
+	si vente
+		et Naction ==0
+			alors achete
+
+* mise a jours info
+
+E est une matrice E[i][2]   E[i][0] : prix action  E[i][1] volume action   i le jour 
+
+ecrire fonction acheté
+achat(E,Naction,Cp,r,i) retourne (passage par adresse simple)
+	Vach = cp/volume   (partir entiere)
+	cp=cp-Pt*Vach
+	Naction = Naction + Vach
+	r=rachat
+
+
+
+ecrire fonction Vendre
+vendre(E,Naction,Cp,r,i) retourne (passage par adresse simple)
+	Vvend = Min(Nact, Volume)   (partir entiere)
+	cp=cp+Pt*Vvend
+	Naction = Naction - Vvend
+	r=rvente
+
+ecrire fonction Garder
+garder(E,Naction,Cp,r,i) retourne (passage par adresse simple)
+	r=Garder
+
+
+
+Deroulement 
+
+*Meme que DQL
