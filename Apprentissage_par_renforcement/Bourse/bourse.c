@@ -4,7 +4,7 @@
 
 
 void achat(int *cp, int *reward, int *Naction, int st, int **Env){ 
-	Vach = floor(*cp/Env[st][1]);
+	int Vach = floor(*cp/Env[st][1]);
 	*cp=*cp-Env[st][0]*Vach;
 	*Naction = *Naction + Vach;
 	*reward=*reward+(Env[st+1][0] - Env[st][0])*Vach;
@@ -12,16 +12,16 @@ void achat(int *cp, int *reward, int *Naction, int st, int **Env){
 
 
 
-void vendre(int *cp, int *reward, int *Naction, int st, int **Env){ retourne (passage par adresse simple)
-	Vvend = floor(Min(*Naction, Env[st][1]));
+void vendre(int *cp, int *reward, int *Naction, int st, int **Env){ 
+	int Vvend = floor(min(*Naction, Env[st][1]));
 	*cp=*cp+Env[st][0]*Vvend;
 	*Naction = *Naction - Vvend;
 	*reward=*reward+(Env[st][0] - Env[st+1][0])*Vvend;
 	}
 
 
-void garde(int *cp, int *reward, int *Naction, int st, int **Env){ retourne (passage par adresse simple)
-	*reward=*reward+(Env[st+1][0] - Env[st][0])*Vach;
+void garde(int *cp, int *reward, int *Naction, int st, int **Env){ 
+	*reward=*reward;
 	}
 
 
