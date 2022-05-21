@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=Wall -Wfatal-errors
-SRC=Q_learning.c functions.c main.c
-INC=functions.h Q_learning.h 
+SRC=bourse.c functions.c main.c
+INC=functions.h bourse.h 
 OBJ=$(SRC:.c=.o)
 
 prog: $(OBJ)
