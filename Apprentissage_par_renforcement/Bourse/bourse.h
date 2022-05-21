@@ -21,6 +21,11 @@ enum action{
 };
  
 typedef enum action action ;
+void achat(int *cp, int *reward, int *Naction, int st, int **Env)
+
+void vendre(int *cp, int *reward, int *Naction, int st, int **Env)
+
+void garde(int *cp, int *reward, int *Naction, int st, int **Env)
 
 void alloc_Env();
 
