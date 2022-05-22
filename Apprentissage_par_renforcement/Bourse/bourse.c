@@ -119,9 +119,17 @@ int gen_nbr_alea(){
 
 int make_action(action a, int *cp, int *reward, int *Naction, int st, int **Env ){
     
+
     int done = 0;
     if(st==goal_row-1){
         done=1;
+        return done;
+    }
+
+
+    if(*cp<0.5 && *Naction < 1){
+       done   = 1;
+       return done;
     }
 
     if (a==sell){
@@ -130,9 +138,6 @@ int make_action(action a, int *cp, int *reward, int *Naction, int st, int **Env 
        achat(cp, reward, Naction, st, Env);
     }else if (a==no_action){
        garde(cp, reward, Naction, st, Env);
-    }
-    if(*cp<0.5 && *Naction < 1){
-       done   = 1;
     }
 
     return done;
@@ -143,7 +148,7 @@ int find_max (int state, float ** Q) {
     int best_reward_location =0;
     int i=1;
     while (i<number_actions){
-        if (Q[state][best_reward_location] < Q[state][i] ){
+        if (Q[state][best_reward_location] <= Q[state][i] ){
             best_reward_location=i;
         }
         i++;
@@ -187,25 +192,48 @@ void print_action(action a){
 
 
 
-void road_draw(){
+void road_draw(int Capital){
 
 //// affiche route
-    int a=0;
-    int st=0;
-    int Sdone=0;
-    action at;
-    Env_reset();
-    do{
-        at=env_action_Qpolicy(st,Q,0.0);
-        print_action(at);
-        a++;
-        st++;
-        if(st==goal_row){
-            Sdone = 1;
+   
+        int st=0;
+        action at;
+        Env_reset();
+        int Naction = 0;
+        int Sdone=0;
+        int cp=Capital;
+        int reward =0;
+        int gain =0;
+        do{
+            printf("Jours %d \n",st+1 );
+            at=env_action_Qpolicy(st,Q,0.0);
+            if(at==sell && Naction==0){
+                print_action(no_action);
+            }else{
+                print_action(at);
+            }
+            Sdone = make_action(at, &cp, &reward, &Naction, st, Env);
+            gain=cp-Capital;
+            printf(" Result %d actions Gain actuel %d\n",Naction, gain);
+            
+            st = st + 1;
+        }while(st!=goal_row-1);
+        
+        printf("Jours %d jour de sortie du marché\n",st+1 );
+        if (Naction==0)
+        {
+            print_action(no_action);
+        }else{
+            print_action(sell);
         }
-    }while(a<rows && Sdone!=1 );
+        Sdone = make_action(sell, &cp, &reward, &Naction, st, Env);
+         
+        gain=cp-Capital + Env[goal_row-1][0]*Naction;
+        printf("%d gain final\n", gain);
+        //printf("\n\n\n\n");
+        
     if(Sdone!=1){
-        printf(" impossible to find the best road, please increase the learning time\n");
+
     }
     else{
         printf("best road founded\n");
@@ -222,14 +250,14 @@ void sum_Q1_Q2(float **Q, float **Q1, float **Q2){
     }
 }
 
-void Double_Q_learning(float alpha, float gamma){
+void Double_Q_learning(float alpha, float gamma, int Capital){
 
 
     int stp1, st;  
     action at,atp1;
     int Sdone=0;
     int reward=0;
-    int cp=1500;
+    int cp=Capital;
     int Naction=0;
     int k=0;
     int nbr_alea=0;
@@ -245,7 +273,9 @@ void Double_Q_learning(float alpha, float gamma){
         st=0;
         Env_reset();
         Naction = 0;
-        cp=1500;
+        k=0;
+        Sdone=0;
+        cp=Capital;
         do{
             //
             sum_Q1_Q2(Q,Q1,Q2);
@@ -275,19 +305,20 @@ void Double_Q_learning(float alpha, float gamma){
                 Sdone=1;
             }
         }while(Sdone!=1 );
-        k=0;
+        
     }
+
     printf("road_draw by Double_Q_learning\n");
 
     // affichez les valeurs de Q
-/*    
+   
     for(int k=0;k<rows;k++){
              printf(" %d\n\n",k);
             printf("%f   %f   %f  \n",Q[k][0],Q[k][1],Q[k][2]);
     }
 
-  */
-        road_draw();
+
+        road_draw(Capital);
 
 
 }

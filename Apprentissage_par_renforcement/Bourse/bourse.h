@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//int Ci=400;
 int** Env;
 float **Q;
 float **Q1;
@@ -50,11 +49,11 @@ action env_action_Qpolicy(int st, float **Q, float epsi);
 
 void print_action(action a);
 
-void road_draw(void);
+void road_draw(int Capital);
 
 void sum_Q1_Q2(float **Q, float **Q1, float **Q2);
 
-void Double_Q_learning(float alpha, float gamma);
+void Double_Q_learning(float alpha, float gamma, int Capital);
 
 
 #endif /* BOURSE_H */
