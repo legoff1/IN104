@@ -2,5 +2,8 @@
 -le labyrinthe est sous forme de texte 
 -la recherche du meilleur chemin peut se faire avec l'algorithme Q learning ou Double Q learning
 # Pour compiler et exécuter
-make 
+make prog
 ./prog 
+
+# Pour supprimer les fichiers .o
+make clean.
